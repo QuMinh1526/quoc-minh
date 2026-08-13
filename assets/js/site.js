@@ -8,16 +8,58 @@
     logo.src = "./assets/img/logo_blue.png";
   }
 
-  const pageBackground = document.getElementById("page-bg");
-  if (pageBackground) {
-    const loadBackground = (extension, fallback) => {
-      const image = new Image();
-      image.onload = () => (pageBackground.style.backgroundImage = `url('./assets/img/background.${extension}')`);
-      image.onerror = fallback;
-      image.src = `./assets/img/background.${extension}`;
-    };
-    loadBackground("gif", () => loadBackground("jpg", () => loadBackground("png")));
+  const MEDIA_INTERVAL = 10000;
+  const mediaExtensions = /\.(avif|bmp|gif|jpe?g|png|svg|webp|mp4|webm|mov|m4v|ogg)$/i;
+
+  function createMediaElement(url, label) {
+    const isVideo = /\.(mp4|webm|mov|m4v|ogg)$/i.test(url);
+    const media = document.createElement(isVideo ? "video" : "img");
+    media.src = url;
+    media.className = label;
+    media.alt = "";
+    if (isVideo) {
+      media.autoplay = true;
+      media.loop = true;
+      media.muted = true;
+      media.playsInline = true;
+    }
+    return media;
   }
+
+  function shuffle(items) {
+    return [...items].sort(() => Math.random() - 0.5);
+  }
+
+  async function loadMediaFolder(folder, target, className) {
+    if (!target) return;
+    try {
+      const response = await fetch(`${folder}/manifest.json`, { cache: "no-store" });
+      if (!response.ok) throw new Error(`Không đọc được ${folder}/manifest.json`);
+      const files = (await response.json())
+        .filter((file) => typeof file === "string" && mediaExtensions.test(file))
+        .map((file) => `${folder}/${encodeURIComponent(file).replace(/%2F/g, "/")}`);
+      if (!files.length) throw new Error(`Thư mục ${folder} không có media hợp lệ`);
+
+      let order = shuffle(files);
+      let index = 0;
+      const showNext = () => {
+        const media = createMediaElement(order[index], className);
+        media.addEventListener("error", () => media.remove(), { once: true });
+        target.replaceChildren(media);
+        if (order.length > 1) {
+          index = (index + 1) % order.length;
+          if (index === 0) order = shuffle(files);
+        }
+      };
+      showNext();
+      if (files.length > 1) window.setInterval(showNext, MEDIA_INTERVAL);
+    } catch (error) {
+      console.warn(`[media] ${error.message}`);
+    }
+  }
+
+  loadMediaFolder("./assets/img/background", document.getElementById("page-bg"), "site-background-media");
+  loadMediaFolder("./assets/img/banner", document.getElementById("site-banner-media"), "site-banner-media");
 
   const welcomeScreen = document.getElementById("welcome-screen");
   if (!welcomeScreen) return;
