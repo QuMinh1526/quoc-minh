@@ -1,4 +1,5 @@
-const GEMINI_MODEL = "gemini-2.5-flash";
+// Uses the Gemini API's current Flash alias rather than pinning an older release.
+const GEMINI_MODEL = "gemini-flash-latest";
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {

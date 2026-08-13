@@ -35,13 +35,20 @@
     if (!playlist.length) return;
     currentIndex = (index + playlist.length) % playlist.length;
     const track = playlist[currentIndex];
+    audio.pause();
     audio.src = encodeURI(track.file);
+    audio.load();
     elTitle.textContent = track.title;
     elArtist.textContent = track.artist;
     setAvatar(track.avatar);
     elTimeCurrent.textContent = "0:00";
     elProgressFill.style.width = "0%";
-    if (autoPlay) audio.play();
+    if (autoPlay) {
+      audio.play().catch((error) => {
+        elArtist.textContent = `Playback error: ${error.message}`;
+        console.warn("[music-player] Không phát được bài nhạc:", error);
+      });
+    }
   }
 
   btnPlay.addEventListener("click", () => (audio.paused ? audio.play() : audio.pause()));
@@ -67,7 +74,7 @@
   });
   audio.addEventListener("ended", () => loadTrack(currentIndex + 1, true));
 
-  fetch("./playlist.json")
+  fetch("./playlist.json", { cache: "no-store" })
     .then((response) => response.json())
     .then((tracks) => {
       if (!Array.isArray(tracks) || !tracks.length) throw new Error("playlist.json không có bài nhạc nào");
