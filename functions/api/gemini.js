@@ -16,6 +16,16 @@ function cleanHeadline(text) {
     .slice(0, 120);
 }
 
+function getGeneratedText(geminiData) {
+  const parts = geminiData?.candidates?.[0]?.content?.parts || [];
+  // Newer Gemini models can return an internal thinking part before the
+  // visible response. Only use visible text when building the marquee.
+  return parts
+    .filter((part) => !part.thought && typeof part.text === "string")
+    .map((part) => part.text)
+    .join(" ");
+}
+
 export async function onRequestPost({ request, env }) {
   if (!env.GEMINI_API_KEY) {
     return json({ error: "GEMINI_API_KEY is not configured on the server." }, 500);
@@ -64,8 +74,12 @@ export async function onRequestPost({ request, env }) {
     }
 
     const geminiData = await geminiResponse.json();
-    const headline = cleanHeadline(geminiData.candidates?.[0]?.content?.parts?.[0]?.text);
-    if (!headline) return json({ error: "Gemini returned no headline." }, 502);
+    const headline = cleanHeadline(getGeneratedText(geminiData));
+    if (!headline) {
+      const reason = geminiData?.candidates?.[0]?.finishReason || geminiData?.promptFeedback?.blockReason || "no visible text";
+      console.error("Gemini returned no headline:", reason);
+      return json({ error: `Gemini returned no headline (${reason}).` }, 502);
+    }
 
     return json({ headline });
   } catch (error) {

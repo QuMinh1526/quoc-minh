@@ -16,6 +16,7 @@
 
   let playlist = [];
   let currentIndex = 0;
+  let notificationTimer;
   audio.volume = 0.4;
 
   const formatTime = (seconds) => {
@@ -31,6 +32,69 @@
     elAvatar.src = encodeURI(avatar);
   }
 
+  function createNowPlayingNotification() {
+    let notification = document.getElementById("now-playing-notification");
+    if (notification) return notification;
+
+    notification = document.createElement("aside");
+    notification.id = "now-playing-notification";
+    notification.className = "now-playing-notification";
+    notification.setAttribute("role", "status");
+    notification.setAttribute("aria-live", "polite");
+    notification.innerHTML = `
+      <img class="now-playing-avatar" alt="" />
+      <div class="now-playing-details">
+        <span class="now-playing-label">Đang phát</span>
+        <strong class="now-playing-title"></strong>
+        <span class="now-playing-artist"></span>
+        <div class="now-playing-controls">
+          <button type="button" class="now-playing-prev" aria-label="Bài trước">⏮</button>
+          <button type="button" class="now-playing-toggle" aria-label="Phát hoặc dừng">▶</button>
+          <button type="button" class="now-playing-next" aria-label="Bài tiếp">⏭</button>
+        </div>
+      </div>`;
+    document.body.appendChild(notification);
+    notification.querySelector(".now-playing-prev").addEventListener("click", () => loadTrack(currentIndex - 1, true));
+    notification.querySelector(".now-playing-next").addEventListener("click", () => loadTrack(currentIndex + 1, true));
+    notification.querySelector(".now-playing-toggle").addEventListener("click", () => (audio.paused ? audio.play() : audio.pause()));
+    return notification;
+  }
+
+  function showNowPlayingNotification(track) {
+    const notification = createNowPlayingNotification();
+    const avatar = notification.querySelector(".now-playing-avatar");
+    avatar.onerror = () => {
+      avatar.onerror = null;
+      avatar.src = avatarFallback;
+    };
+    avatar.src = encodeURI(track.avatar);
+    notification.querySelector(".now-playing-title").textContent = track.title;
+    notification.querySelector(".now-playing-artist").textContent = track.artist;
+    notification.classList.add("is-visible");
+    window.clearTimeout(notificationTimer);
+    notificationTimer = window.setTimeout(() => notification.classList.remove("is-visible"), 6500);
+
+    showBrowserNotification(track);
+  }
+
+  function showBrowserNotification(track) {
+    if ("Notification" in window && Notification.permission === "granted") {
+      new Notification(track.title, { body: track.artist, icon: encodeURI(track.avatar), image: encodeURI(track.avatar), tag: "now-playing" });
+    }
+  }
+
+  function requestNotificationPermission() {
+    if (!("Notification" in window) || Notification.permission !== "default") return;
+    Notification.requestPermission().then((permission) => {
+      if (permission === "granted" && playlist[currentIndex]) showBrowserNotification(playlist[currentIndex]);
+    });
+  }
+
+  function syncNotificationPlayState() {
+    const toggle = document.querySelector(".now-playing-toggle");
+    if (toggle) toggle.textContent = audio.paused ? "▶" : "❚❚";
+  }
+
   function loadTrack(index, autoPlay) {
     if (!playlist.length) return;
     currentIndex = (index + playlist.length) % playlist.length;
@@ -43,6 +107,7 @@
     setAvatar(track.avatar);
     elTimeCurrent.textContent = "0:00";
     elProgressFill.style.width = "0%";
+    showNowPlayingNotification(track);
     if (autoPlay) {
       audio.play().catch((error) => {
         elArtist.textContent = `Playback error: ${error.message}`;
@@ -51,9 +116,18 @@
     }
   }
 
-  btnPlay.addEventListener("click", () => (audio.paused ? audio.play() : audio.pause()));
-  btnNext.addEventListener("click", () => loadTrack(currentIndex + 1, true));
-  btnPrev.addEventListener("click", () => loadTrack(currentIndex - 1, true));
+  btnPlay.addEventListener("click", () => {
+    requestNotificationPermission();
+    audio.paused ? audio.play() : audio.pause();
+  });
+  btnNext.addEventListener("click", () => {
+    requestNotificationPermission();
+    loadTrack(currentIndex + 1, true);
+  });
+  btnPrev.addEventListener("click", () => {
+    requestNotificationPermission();
+    loadTrack(currentIndex - 1, true);
+  });
   elProgressBar.addEventListener("click", (event) => {
     if (!Number.isFinite(audio.duration)) return;
     const rect = elProgressBar.getBoundingClientRect();
@@ -62,10 +136,12 @@
   audio.addEventListener("play", () => {
     iconPlay.style.display = "none";
     iconPause.style.display = "block";
+    syncNotificationPlayState();
   });
   audio.addEventListener("pause", () => {
     iconPlay.style.display = "block";
     iconPause.style.display = "none";
+    syncNotificationPlayState();
   });
   audio.addEventListener("loadedmetadata", () => (elTimeTotal.textContent = formatTime(audio.duration)));
   audio.addEventListener("timeupdate", () => {

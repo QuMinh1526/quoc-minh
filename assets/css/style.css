@@ -437,6 +437,89 @@ html {
   background: #6fc589;
 }
 
+/* Thông báo đang phát trong web: bố cục đồng bộ với music player. */
+.now-playing-notification {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 3000;
+  display: flex;
+  gap: 12px;
+  width: min(340px, calc(100vw - 32px));
+  padding: 12px;
+  color: #eeeeee;
+  background: rgba(26, 34, 29, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 14px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.32);
+  opacity: 0;
+  transform: translateY(18px);
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.now-playing-notification.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.now-playing-avatar {
+  width: 76px;
+  height: 76px;
+  flex: 0 0 76px;
+  object-fit: cover;
+  border-radius: 9px;
+}
+
+.now-playing-details {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.now-playing-label {
+  color: #8fd9a0;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.now-playing-title,
+.now-playing-artist {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.now-playing-title {
+  margin-top: 2px;
+  font-size: 0.9rem;
+}
+
+.now-playing-artist {
+  margin-top: 2px;
+  color: #9aa89e;
+  font-size: 0.76rem;
+}
+
+.now-playing-controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-top: auto;
+}
+
+.now-playing-controls button {
+  padding: 2px;
+  border: 0;
+  color: #eeeeee;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  background: transparent;
+}
+
 .card {
   position: relative;
   background: #ffffff;
