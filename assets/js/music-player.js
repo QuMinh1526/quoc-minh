@@ -17,6 +17,8 @@
   let playlist = [];
   let currentIndex = 0;
   let notificationTimer;
+  let notificationHideTimer;
+  let shouldAutoplay = false;
   audio.volume = 0.4;
 
   const formatTime = (seconds) => {
@@ -42,27 +44,19 @@
     notification.setAttribute("role", "status");
     notification.setAttribute("aria-live", "polite");
     notification.innerHTML = `
-      <img class="now-playing-avatar" alt="" />
-      <div class="now-playing-details">
-        <div class="now-playing-text">
+      <div class="now-playing-main">
+        <img class="now-playing-avatar" alt="" />
+        <div class="now-playing-details">
           <strong class="now-playing-title"></strong>
           <span class="now-playing-artist"></span>
         </div>
-        <div class="now-playing-timeline">
-          <span class="now-playing-current">0:00</span>
-          <div class="now-playing-progress"><div class="now-playing-progress-fill"></div></div>
-          <span class="now-playing-total">0:00</span>
-        </div>
-        <div class="now-playing-controls">
-          <button type="button" class="now-playing-prev" aria-label="Bài trước"><svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg></button>
-          <button type="button" class="now-playing-toggle" aria-label="Phát hoặc dừng"><svg class="now-playing-play-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg><svg class="now-playing-pause-icon" viewBox="0 0 24 24"><path d="M6 5h4v14H6zm8 0h4v14h-4z"/></svg></button>
-          <button type="button" class="now-playing-next" aria-label="Bài tiếp"><svg viewBox="0 0 24 24"><path d="M16 6h2v12h-2zm-2 6L5.5 6v12z"/></svg></button>
-        </div>
+      </div>
+      <div class="now-playing-timeline">
+        <span class="now-playing-current">0:00</span>
+        <div class="now-playing-progress"><div class="now-playing-progress-fill"></div></div>
+        <span class="now-playing-total">0:00</span>
       </div>`;
     document.body.appendChild(notification);
-    notification.querySelector(".now-playing-prev").addEventListener("click", () => loadTrack(currentIndex - 1, true));
-    notification.querySelector(".now-playing-next").addEventListener("click", () => loadTrack(currentIndex + 1, true));
-    notification.querySelector(".now-playing-toggle").addEventListener("click", () => (audio.paused ? audio.play() : audio.pause()));
     return notification;
   }
 
@@ -77,10 +71,17 @@
     notification.querySelector(".now-playing-title").textContent = track.title;
     notification.querySelector(".now-playing-artist").textContent = track.artist;
     syncNotificationTimeline();
-    syncNotificationPlayState();
+    window.clearTimeout(notificationHideTimer);
+    notification.classList.remove("is-hiding");
+    notification.classList.remove("is-visible");
+    void notification.offsetWidth;
     notification.classList.add("is-visible");
     window.clearTimeout(notificationTimer);
-    notificationTimer = window.setTimeout(() => notification.classList.remove("is-visible"), 6500);
+    notificationTimer = window.setTimeout(() => {
+      notification.classList.remove("is-visible");
+      notification.classList.add("is-hiding");
+      notificationHideTimer = window.setTimeout(() => notification.classList.remove("is-hiding"), 320);
+    }, 3000);
 
     showBrowserNotification(track);
   }
@@ -98,13 +99,6 @@
     });
   }
 
-  function syncNotificationPlayState() {
-    const playIcon = document.querySelector(".now-playing-play-icon");
-    const pauseIcon = document.querySelector(".now-playing-pause-icon");
-    if (playIcon) playIcon.style.display = audio.paused ? "block" : "none";
-    if (pauseIcon) pauseIcon.style.display = audio.paused ? "none" : "block";
-  }
-
   function syncNotificationTimeline() {
     const current = document.querySelector(".now-playing-current");
     const total = document.querySelector(".now-playing-total");
@@ -118,6 +112,7 @@
     if (!playlist.length) return;
     currentIndex = (index + playlist.length) % playlist.length;
     const track = playlist[currentIndex];
+    shouldAutoplay = autoPlay;
     audio.pause();
     audio.src = encodeURI(track.file);
     audio.load();
@@ -126,13 +121,15 @@
     setAvatar(track.avatar);
     elTimeCurrent.textContent = "0:00";
     elProgressFill.style.width = "0%";
-    showNowPlayingNotification(track);
-    if (autoPlay) {
-      audio.play().catch((error) => {
-        elArtist.textContent = `Playback error: ${error.message}`;
-        console.warn("[music-player] Không phát được bài nhạc:", error);
-      });
-    }
+  }
+
+  function playLoadedTrack() {
+    if (!shouldAutoplay) return;
+    shouldAutoplay = false;
+    audio.play().catch((error) => {
+      elArtist.textContent = `Playback error: ${error.message}`;
+      console.warn("[music-player] Không phát được bài nhạc:", error);
+    });
   }
 
   btnPlay.addEventListener("click", () => {
@@ -155,14 +152,14 @@
   audio.addEventListener("play", () => {
     iconPlay.style.display = "none";
     iconPause.style.display = "block";
-    syncNotificationPlayState();
+    if (playlist[currentIndex]) showNowPlayingNotification(playlist[currentIndex]);
   });
   audio.addEventListener("pause", () => {
     iconPlay.style.display = "block";
     iconPause.style.display = "none";
-    syncNotificationPlayState();
   });
   audio.addEventListener("loadedmetadata", () => (elTimeTotal.textContent = formatTime(audio.duration)));
+  audio.addEventListener("canplay", playLoadedTrack);
   audio.addEventListener("timeupdate", () => {
     elTimeCurrent.textContent = formatTime(audio.currentTime);
     if (Number.isFinite(audio.duration) && audio.duration > 0) elProgressFill.style.width = `${(audio.currentTime / audio.duration) * 100}%`;

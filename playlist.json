@@ -1,23 +1,37 @@
 [
   {
-    "id": 3,
+    "id": 4,
     "title": "Thương lấy phận mình",
     "avatar": "assets/music/Thương lấy phận mình.jpg",
     "artist": "Thái Học",
     "file": "assets/music/Thương lấy phận mình.mp3"
   },
   {
-    "id": 2,
+    "id": 3,
     "title": "Lo Người Ướt Áo Remix x Con Tim Anh Thay Đổi",
     "avatar": "assets/music/Lo Người Ướt Áo Remix x Con Tim Anh Thay Đổi - Cover.jpg",
     "artist": "Ko biết",
     "file": "assets/music/Lo Người Ướt Áo Remix x Con Tim Anh Thay Đổi.mp3"
   },
-{
-    "id": 1,
+  {
+    "id": 5,
     "title": "Zalo",
     "avatar": "assets/music/Zalo.webp",
     "artist": "Zalo",
     "file": "assets/music/Zalo.mp3"
+  },
+    {
+    "id": 2,
+    "title": "Lỗi Lầm Em Mang Đi x EQKD - Có Mình Và Ta ft Tình Yêu Màu Nắng",
+    "avatar": "assets/music/Lỗi Lầm Em Mang Đi x EQKD - Có Mình Và Ta ft Tình Yêu Màu Nắng.jpg",
+    "artist": "Minh Hoàng remix",
+    "file": "assets/music/Lỗi Lầm Em Mang Đi x EQKD - Có Mình Và Ta ft Tình Yêu Màu Nắng.mp3"
+  },
+     {
+    "id": 1,
+    "title": "Thủy Chung Ft. Yêu Một Người Có Lẽ - Nson Remix - Rem Music   Tran Đat",
+    "avatar": "assets/music/Thủy Chung Ft. Yêu Một Người Có Lẽ - Nson Remix - Rem Music   Tran Đat.jpg",
+    "artist": "Nson remix",
+    "file": "assets/music/Thủy Chung Ft. Yêu Một Người Có Lẽ - Nson Remix - Rem Music   Tran Đat.mp3"
   }
 ]

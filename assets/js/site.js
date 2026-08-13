@@ -49,7 +49,9 @@
     stars.appendChild(star);
   }
   welcomeScreen.addEventListener("click", () => {
-    welcomeScreen.style.display = "none";
+    document.body.classList.add("site-entered");
+    welcomeScreen.classList.add("is-leaving");
+    window.setTimeout(() => (welcomeScreen.style.display = "none"), 520);
     document.getElementById("music-audio")?.play();
-  });
+  }, { once: true });
 })();

@@ -166,6 +166,14 @@ html {
   z-index: 1000;
   cursor: pointer;
   overflow: hidden;
+  transition: opacity 0.48s ease-in, transform 0.52s cubic-bezier(0.4, 0, 1, 1), filter 0.42s ease-in;
+}
+
+#welcome-screen.is-leaving {
+  opacity: 0;
+  transform: translateY(20px) scale(1.035);
+  filter: blur(5px);
+  pointer-events: none;
 }
 
 #welcome-screen .shooting-stars {
@@ -291,6 +299,57 @@ html {
   align-items: center;
   justify-content: center;
   width: 100%;
+}
+
+body.site-entered .card-container {
+  animation: site-content-arrive 0.95s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+body.site-entered #weather-marquee-bar {
+  animation: site-marquee-arrive 0.8s 0.12s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes site-content-arrive {
+  0% {
+    opacity: 0;
+    transform: translateY(-140px) scale(0.92) rotate(-1.5deg);
+    filter: blur(10px);
+  }
+  55% {
+    opacity: 1;
+    filter: blur(0);
+  }
+  72% {
+    transform: translateY(14px) scale(1.015) rotate(0.4deg);
+  }
+  86% {
+    transform: translateY(-5px) scale(0.998) rotate(-0.1deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1) rotate(0deg);
+    filter: blur(0);
+  }
+}
+
+@keyframes site-marquee-arrive {
+  0% {
+    opacity: 0;
+    transform: translateY(-90px) scale(0.9);
+    filter: blur(6px);
+  }
+  60% {
+    opacity: 1;
+    filter: blur(0);
+  }
+  80% {
+    transform: translateY(6px) scale(1.01);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
 }
 
 /* Viền 4 góc kiểu corner-bracket, không bo hết viền */
@@ -444,7 +503,8 @@ html {
   bottom: 16px;
   z-index: 3000;
   display: flex;
-  gap: 9px;
+  flex-direction: column;
+  gap: 8px;
   width: min(290px, calc(100vw - 32px));
   padding: 9px;
   color: #eeeeee;
@@ -453,15 +513,77 @@ html {
   border-radius: 14px;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.32);
   opacity: 0;
-  transform: translateY(18px);
+  transform: translateY(28px) scale(0.92);
+  transform-origin: right bottom;
   pointer-events: none;
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  filter: blur(3px);
+  transition:
+    opacity 0.28s ease-in,
+    transform 0.28s cubic-bezier(0.4, 0, 1, 1),
+    filter 0.22s ease-in;
 }
 
 .now-playing-notification.is-visible {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateY(0) scale(1);
   pointer-events: auto;
+  filter: blur(0);
+  animation: now-playing-pop 0.48s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.now-playing-notification.is-hiding {
+  opacity: 0;
+  transform: translateY(22px) scale(0.94);
+  pointer-events: none;
+  filter: blur(3px);
+  animation: now-playing-dismiss 0.32s cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+@keyframes now-playing-pop {
+  0% {
+    opacity: 0;
+    transform: translateY(28px) scale(0.92);
+    filter: blur(3px);
+  }
+  65% {
+    opacity: 1;
+    transform: translateY(-3px) scale(1.018);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes now-playing-dismiss {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(22px) scale(0.94);
+    filter: blur(3px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .now-playing-notification,
+  .now-playing-notification.is-visible {
+    animation: none;
+    transition: opacity 0.15s linear;
+    transform: none;
+    filter: none;
+  }
+}
+
+.now-playing-main {
+  display: flex;
+  gap: 9px;
+  align-items: center;
 }
 
 .now-playing-avatar {
@@ -477,6 +599,7 @@ html {
   flex: 1;
   min-width: 0;
   flex-direction: column;
+  justify-content: center;
 }
 
 .now-playing-title,
@@ -489,19 +612,20 @@ html {
 .now-playing-title {
   display: block;
   font-size: 0.78rem;
+  font-family: "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
 }
 
 .now-playing-artist {
   margin-top: 2px;
   color: #9aa89e;
   font-size: 0.68rem;
+  font-family: "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
 }
 
 .now-playing-timeline {
   display: flex;
-  gap: 5px;
+  gap: 6px;
   align-items: center;
-  margin-top: 5px;
 }
 
 .now-playing-current,
@@ -509,6 +633,7 @@ html {
   min-width: 23px;
   color: #9aa89e;
   font-size: 0.55rem;
+  font-family: "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
 }
 
 .now-playing-total { text-align: right; }
@@ -527,40 +652,6 @@ html {
   background: #8fd9a0;
 }
 
-.now-playing-controls {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  margin-top: auto;
-}
-
-.now-playing-controls button {
-  padding: 2px;
-  border: 0;
-  color: #eeeeee;
-  line-height: 1;
-  cursor: pointer;
-  background: transparent;
-}
-
-.now-playing-controls svg {
-  width: 13px;
-  height: 13px;
-  fill: currentColor;
-}
-
-.now-playing-toggle {
-  display: flex;
-  width: 22px;
-  height: 22px;
-  align-items: center;
-  justify-content: center;
-  color: #17301f !important;
-  background: #8fd9a0 !important;
-  border-radius: 50% !important;
-}
-
-.now-playing-pause-icon { display: none; }
 
 .card {
   position: relative;
@@ -815,6 +906,7 @@ html {
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  text-decoration: none;
   transition: transform 0.15s ease;
 }
 
@@ -838,6 +930,14 @@ html {
 
 .socials .social-icon.discord {
   background: #5865f2;
+}
+
+.socials .social-icon.github {
+  background: #181717;
+}
+
+.socials .social-icon.cloudflare {
+  background: #f38020;
 }
 
 /* Profile Effect (leaves falling) */
@@ -927,43 +1027,4 @@ html {
 .profile-effect .leaves i:nth-child(2)  { left: 12%; animation-delay: 1.2s; animation-duration: 6.2s; animation-name: leaf-falling2; }
 .profile-effect .leaves i:nth-child(3)  { left: 20%; animation-delay: 2.6s; animation-duration: 5.8s; animation-name: leaf-falling3; }
 .profile-effect .leaves i:nth-child(4)  { left: 28%; animation-delay: 0.6s; animation-duration: 6.5s; }
-.profile-effect .leaves i:nth-child(5)  { left: 36%; animation-delay: 3.4s; animation-duration: 5.4s; animation-name: leaf-falling2; }
-.profile-effect .leaves i:nth-child(6)  { left: 44%; animation-delay: 1.8s; animation-duration: 6.8s; animation-name: leaf-falling3; }
-.profile-effect .leaves i:nth-child(7)  { left: 52%; animation-delay: 4.2s; animation-duration: 5.9s; }
-.profile-effect .leaves i:nth-child(8)  { left: 60%; animation-delay: 0.3s; animation-duration: 6.1s; animation-name: leaf-falling2; }
-.profile-effect .leaves i:nth-child(9)  { left: 68%; animation-delay: 2.1s; animation-duration: 5.6s; animation-name: leaf-falling3; }
-.profile-effect .leaves i:nth-child(10) { left: 76%; animation-delay: 3.9s; animation-duration: 6.4s; }
-.profile-effect .leaves i:nth-child(11) { left: 84%; animation-delay: 1.5s; animation-duration: 5.7s; animation-name: leaf-falling2; }
-.profile-effect .leaves i:nth-child(12) { left: 92%; animation-delay: 4.6s; animation-duration: 6s;   animation-name: leaf-falling3; }
-.profile-effect .leaves i:nth-child(13) { left: 96%; animation-delay: 0.9s; animation-duration: 6.3s; }
-.profile-effect .leaves i:nth-child(14) { left: 8%;  animation-delay: 3.1s; animation-duration: 5.5s; animation-name: leaf-falling2; }
-.profile-effect .leaves i:nth-child(15) { left: 56%; animation-delay: 5.1s; animation-duration: 6.6s; animation-name: leaf-falling3; }
-
-@keyframes leaf-falling {
-  0% { transform: translate3d(0, 0, 0) rotate(0deg) skew(20deg); opacity: 0; }
-  8% { opacity: 0.75; }
-  92% { opacity: 0.6; }
-  100% { transform: translate3d(-30px, 560px, 0) rotate(90deg) skew(20deg); opacity: 0; }
-}
-
-@keyframes leaf-falling2 {
-  0% { transform: translate3d(0, 0, 0) rotate(90deg) skew(20deg); opacity: 0; }
-  8% { opacity: 0.75; }
-  92% { opacity: 0.6; }
-  100% { transform: translate3d(-45px, 560px, 0) rotate(10deg) skew(20deg); opacity: 0; }
-}
-
-@keyframes leaf-falling3 {
-  0% { transform: translate3d(0, 0, 0) rotate(-20deg) skew(20deg); opacity: 0; }
-  8% { opacity: 0.75; }
-  92% { opacity: 0.6; }
-  100% { transform: translate3d(-20px, 560px, 0) rotate(-70deg) skew(20deg); opacity: 0; }
-}
-
-/* Responsive */
-@media screen and (max-width: 380px) {
-  .card {
-    width: 90vw;
-    max-width: 345px;
-  }
-}
+.profile-e
