@@ -44,13 +44,19 @@
     notification.innerHTML = `
       <img class="now-playing-avatar" alt="" />
       <div class="now-playing-details">
-        <span class="now-playing-label">Đang phát</span>
-        <strong class="now-playing-title"></strong>
-        <span class="now-playing-artist"></span>
+        <div class="now-playing-text">
+          <strong class="now-playing-title"></strong>
+          <span class="now-playing-artist"></span>
+        </div>
+        <div class="now-playing-timeline">
+          <span class="now-playing-current">0:00</span>
+          <div class="now-playing-progress"><div class="now-playing-progress-fill"></div></div>
+          <span class="now-playing-total">0:00</span>
+        </div>
         <div class="now-playing-controls">
-          <button type="button" class="now-playing-prev" aria-label="Bài trước">⏮</button>
-          <button type="button" class="now-playing-toggle" aria-label="Phát hoặc dừng">▶</button>
-          <button type="button" class="now-playing-next" aria-label="Bài tiếp">⏭</button>
+          <button type="button" class="now-playing-prev" aria-label="Bài trước"><svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg></button>
+          <button type="button" class="now-playing-toggle" aria-label="Phát hoặc dừng"><svg class="now-playing-play-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg><svg class="now-playing-pause-icon" viewBox="0 0 24 24"><path d="M6 5h4v14H6zm8 0h4v14h-4z"/></svg></button>
+          <button type="button" class="now-playing-next" aria-label="Bài tiếp"><svg viewBox="0 0 24 24"><path d="M16 6h2v12h-2zm-2 6L5.5 6v12z"/></svg></button>
         </div>
       </div>`;
     document.body.appendChild(notification);
@@ -70,6 +76,8 @@
     avatar.src = encodeURI(track.avatar);
     notification.querySelector(".now-playing-title").textContent = track.title;
     notification.querySelector(".now-playing-artist").textContent = track.artist;
+    syncNotificationTimeline();
+    syncNotificationPlayState();
     notification.classList.add("is-visible");
     window.clearTimeout(notificationTimer);
     notificationTimer = window.setTimeout(() => notification.classList.remove("is-visible"), 6500);
@@ -91,8 +99,19 @@
   }
 
   function syncNotificationPlayState() {
-    const toggle = document.querySelector(".now-playing-toggle");
-    if (toggle) toggle.textContent = audio.paused ? "▶" : "❚❚";
+    const playIcon = document.querySelector(".now-playing-play-icon");
+    const pauseIcon = document.querySelector(".now-playing-pause-icon");
+    if (playIcon) playIcon.style.display = audio.paused ? "block" : "none";
+    if (pauseIcon) pauseIcon.style.display = audio.paused ? "none" : "block";
+  }
+
+  function syncNotificationTimeline() {
+    const current = document.querySelector(".now-playing-current");
+    const total = document.querySelector(".now-playing-total");
+    const fill = document.querySelector(".now-playing-progress-fill");
+    if (current) current.textContent = formatTime(audio.currentTime);
+    if (total) total.textContent = formatTime(audio.duration);
+    if (fill) fill.style.width = Number.isFinite(audio.duration) && audio.duration > 0 ? `${(audio.currentTime / audio.duration) * 100}%` : "0%";
   }
 
   function loadTrack(index, autoPlay) {
@@ -147,6 +166,7 @@
   audio.addEventListener("timeupdate", () => {
     elTimeCurrent.textContent = formatTime(audio.currentTime);
     if (Number.isFinite(audio.duration) && audio.duration > 0) elProgressFill.style.width = `${(audio.currentTime / audio.duration) * 100}%`;
+    syncNotificationTimeline();
   });
   audio.addEventListener("ended", () => loadTrack(currentIndex + 1, true));
 

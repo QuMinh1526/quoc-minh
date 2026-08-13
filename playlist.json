@@ -1,6 +1,6 @@
 [
   {
-    "id": 1,
+    "id": 3,
     "title": "Thương lấy phận mình",
     "avatar": "assets/music/Thương lấy phận mình.jpg",
     "artist": "Thái Học",
@@ -12,5 +12,12 @@
     "avatar": "assets/music/Lo Người Ướt Áo Remix x Con Tim Anh Thay Đổi - Cover.jpg",
     "artist": "Ko biết",
     "file": "assets/music/Lo Người Ướt Áo Remix x Con Tim Anh Thay Đổi.mp3"
+  },
+{
+    "id": 1,
+    "title": "Zalo",
+    "avatar": "assets/music/Zalo.webp",
+    "artist": "Zalo",
+    "file": "assets/music/Zalo.mp3"
   }
 ]

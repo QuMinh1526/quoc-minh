@@ -444,9 +444,9 @@ html {
   bottom: 16px;
   z-index: 3000;
   display: flex;
-  gap: 12px;
-  width: min(340px, calc(100vw - 32px));
-  padding: 12px;
+  gap: 9px;
+  width: min(290px, calc(100vw - 32px));
+  padding: 9px;
   color: #eeeeee;
   background: rgba(26, 34, 29, 0.96);
   border: 1px solid rgba(255, 255, 255, 0.13);
@@ -465,9 +465,9 @@ html {
 }
 
 .now-playing-avatar {
-  width: 76px;
-  height: 76px;
-  flex: 0 0 76px;
+  width: 62px;
+  height: 62px;
+  flex: 0 0 62px;
   object-fit: cover;
   border-radius: 9px;
 }
@@ -479,12 +479,6 @@ html {
   flex-direction: column;
 }
 
-.now-playing-label {
-  color: #8fd9a0;
-  font-size: 0.7rem;
-  font-weight: 600;
-}
-
 .now-playing-title,
 .now-playing-artist {
   overflow: hidden;
@@ -493,19 +487,49 @@ html {
 }
 
 .now-playing-title {
-  margin-top: 2px;
-  font-size: 0.9rem;
+  display: block;
+  font-size: 0.78rem;
 }
 
 .now-playing-artist {
   margin-top: 2px;
   color: #9aa89e;
-  font-size: 0.76rem;
+  font-size: 0.68rem;
+}
+
+.now-playing-timeline {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  margin-top: 5px;
+}
+
+.now-playing-current,
+.now-playing-total {
+  min-width: 23px;
+  color: #9aa89e;
+  font-size: 0.55rem;
+}
+
+.now-playing-total { text-align: right; }
+
+.now-playing-progress {
+  flex: 1;
+  height: 3px;
+  overflow: hidden;
+  background: #ffffff26;
+  border-radius: 2px;
+}
+
+.now-playing-progress-fill {
+  width: 0;
+  height: 100%;
+  background: #8fd9a0;
 }
 
 .now-playing-controls {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   align-items: center;
   margin-top: auto;
 }
@@ -514,11 +538,29 @@ html {
   padding: 2px;
   border: 0;
   color: #eeeeee;
-  font-size: 1rem;
   line-height: 1;
   cursor: pointer;
   background: transparent;
 }
+
+.now-playing-controls svg {
+  width: 13px;
+  height: 13px;
+  fill: currentColor;
+}
+
+.now-playing-toggle {
+  display: flex;
+  width: 22px;
+  height: 22px;
+  align-items: center;
+  justify-content: center;
+  color: #17301f !important;
+  background: #8fd9a0 !important;
+  border-radius: 50% !important;
+}
+
+.now-playing-pause-icon { display: none; }
 
 .card {
   position: relative;
@@ -587,8 +629,8 @@ html {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 160%;
-  height: 160%;
+  width: 150%;
+  height: 150%;
   transform: translate(-50%, -50%);
   pointer-events: none;
   user-select: none;
