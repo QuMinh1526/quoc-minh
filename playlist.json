@@ -1,3 +1,16 @@
 [
-  "Thương lấy phận mình.mp3"
+  {
+    "id": 1,
+    "title": "Thương lấy phận mình",
+    "avatar": "assets/music/Thương lấy phận mình.jpg",
+    "artist": "Thái Học",
+    "file": "assets/music/Thương lấy phận mình.mp3"
+  },
+  {
+    "id": 2,
+    "title": "Lo Người Ướt Áo Remix x Con Tim Anh Thay Đổi",
+    "avatar": "assets/music/Lo Người Ướt Áo Remix x Con Tim Anh Thay Đổi.jpg",
+    "artist": "Ko biết",
+    "file": "assets/music/Lo Người Ướt Áo Remix x Con Tim Anh Thay Đổi.mp3"
+  }
 ]

@@ -23,25 +23,22 @@
     return `${Math.floor(seconds / 60)}:${String(Math.floor(seconds) % 60).padStart(2, "0")}`;
   };
 
-  function setAvatar() {
+  function setAvatar(avatar) {
     elAvatar.onerror = () => {
-      elAvatar.onerror = () => {
-        elAvatar.onerror = null;
-        elAvatar.src = avatarFallback;
-      };
-      elAvatar.src = "./music_avatar.jpg";
+      elAvatar.onerror = null;
+      elAvatar.src = avatarFallback;
     };
-    elAvatar.src = "./music_avatar.png";
+    elAvatar.src = encodeURI(avatar);
   }
 
   function loadTrack(index, autoPlay) {
     if (!playlist.length) return;
     currentIndex = (index + playlist.length) % playlist.length;
-    const file = playlist[currentIndex];
-    audio.src = encodeURI(file);
-    elTitle.textContent = decodeURIComponent(file.split("/").pop() || "").replace(/\.[^/.]+$/, "").replace(/[_-]+/g, " ");
-    elArtist.textContent = "Local File";
-    setAvatar();
+    const track = playlist[currentIndex];
+    audio.src = encodeURI(track.file);
+    elTitle.textContent = track.title;
+    elArtist.textContent = track.artist;
+    setAvatar(track.avatar);
     elTimeCurrent.textContent = "0:00";
     elProgressFill.style.width = "0%";
     if (autoPlay) audio.play();
@@ -72,10 +69,22 @@
 
   fetch("./playlist.json")
     .then((response) => response.json())
-    .then((files) => {
-      if (!files.length) return;
-      playlist = files;
+    .then((tracks) => {
+      if (!Array.isArray(tracks) || !tracks.length) throw new Error("playlist.json không có bài nhạc nào");
+      playlist = tracks
+        .map((track) => ({ ...track, id: Number(track.id) }))
+        .sort((first, second) => first.id - second.id);
+      playlist.forEach((track, index) => {
+        if (track.id !== index + 1) throw new Error("Số id trong playlist.json phải liên tiếp từ 1");
+        if (!track.title || !track.avatar || !track.artist || !track.file) {
+          throw new Error(`Bài id ${track.id} thiếu title, avatar, artist hoặc file`);
+        }
+      });
       loadTrack(0, false);
     })
-    .catch((error) => console.warn("[music-player] Không đọc được playlist:", error));
+    .catch((error) => {
+      elTitle.textContent = "Playlist error";
+      elArtist.textContent = error.message;
+      console.warn("[music-player] Không đọc được playlist:", error);
+    });
 })();
