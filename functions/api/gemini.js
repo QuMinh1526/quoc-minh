@@ -56,8 +56,10 @@ export async function onRequestPost({ request, env }) {
     );
 
     if (!geminiResponse.ok) {
-      console.error("Gemini error:", geminiResponse.status);
-      return json({ error: "Could not generate a headline." }, 502);
+      const errorData = await geminiResponse.json().catch(() => ({}));
+      const message = String(errorData?.error?.message || "Unknown Gemini API error").slice(0, 240);
+      console.error("Gemini error:", geminiResponse.status, message);
+      return json({ error: `Gemini API error (${geminiResponse.status}): ${message}` }, 502);
     }
 
     const geminiData = await geminiResponse.json();

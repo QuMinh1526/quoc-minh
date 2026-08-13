@@ -43,8 +43,8 @@
       body: JSON.stringify(weather),
     });
 
-    if (!response.ok) throw new Error(`Gemini request failed: ${response.status}`);
-    const data = await response.json();
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || `Gemini request failed (${response.status})`);
     return cleanHeadline(data.headline);
   }
 
@@ -71,7 +71,7 @@
       // reflects the request lifecycle and remains below 100% until it returns.
       const elapsed = Date.now() - startedAt;
       const percent = Math.min(95, Math.floor(elapsed / 100));
-      setMarqueeText(`A.I Gemini đang nghĩ tiêu đề: ${percent}%`, true);
+      setMarqueeText(`Đang tải... ${percent}%`, true);
     };
 
     render();
@@ -96,7 +96,9 @@
       updateMarquee(headline, weather.marqueeText);
     } catch (error) {
       stopLoadingProgress();
-      setMarqueeText("A.I Gemini chưa tạo được tiêu đề, đang thử lại...", true);
+      // Only the numeric loading state is static. Any failure must remain
+      // visible as a normal scrolling marquee instead of looking stuck.
+      setMarqueeText(`Error: ${error.message || String(error)}`, false);
       console.warn("[gemini-marquee] Không tạo được headline:", error);
     }
   });
